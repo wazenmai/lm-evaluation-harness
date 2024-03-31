@@ -1,7 +1,6 @@
-accelerate launch \
-    --num_processes=1 \
-    --mixed_precision=bf16 \
-    --ipex \
-    -m lm_eval --model hf \
-    --model_args pretrained=EleutherAI/pythia-14m,dtype=bfloat16,parallelize=True \
-    --tasks mmlu --batch_size 16 |& tee log1
+lm_eval --model hf \
+    --model_args pretrained=$PRUNED_MODEL_PATH,dtype=bfloat16 \
+    --tasks mmlu --device cuda --batch_size 16 |& tee log1
+# parallelize=True
+# EleutherAI/pythia-14m
+# "/home/wazenmai/Warehouse/MoE/models/mixtral-8x7B_layerwise_pruning_r6_c4_128_20240330-160959"

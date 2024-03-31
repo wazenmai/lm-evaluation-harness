@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  lm-eval:
+    image: llm-evaluate:latest
+    build: .
+
+    # need version '3.8'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # need version '2.3'
+    # runtime: nvidia
+
+    volumes:
+      # TODO: replace /home/wazenmai/Warehouse/MoE/models/ to the model path
+      - /home/wazenmai/Warehouse/MoE/models/:/models/
+    
+    # TODO: replace /models/pythia-14m to the model path
+    command: bash -c "lm_eval --model hf --model_args pretrained=/models/pythia-14m,dtype=bfloat16 --tasks mmlu --device cuda --batch_size 16 |& tee log1"
