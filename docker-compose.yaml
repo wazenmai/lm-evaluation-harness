@@ -21,4 +21,4 @@ services:
       - /home/wazenmai/Warehouse/MoE/models/:/models/
     
     # TODO: replace /models/pythia-14m to the model path
-    command: bash -c "lm_eval --model hf --model_args pretrained=/models/pythia-14m,dtype=bfloat16 --tasks mmlu --device cuda --batch_size 16 |& tee log1"
+    command: bash -c "lm_eval --model hf --model_args pretrained=/models/pythia-14m,dtype=bfloat16 --tasks boolq,rte,arc_challenge,arc_easy,hellaswag,winogrande,openbookqa,gsm8k,mmlu --device cuda --batch_size 16 |& tee log1"
