@@ -398,14 +398,15 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
                         ensure_ascii=False,
                     )
                     filename.write_text(samples_dumped, encoding="utf-8")
-
-        print(
-            f"{args.model} ({args.model_args}), gen_kwargs: ({args.gen_kwargs}), limit: {args.limit}, num_fewshot: {args.num_fewshot}, "
-            f"batch_size: {args.batch_size}{f' ({batch_sizes})' if batch_sizes else ''}"
-        )
-        print(make_table(results))
-        if "groups" in results:
-            print(make_table(results, "groups"))
+        with open('./results/log', 'w') as f:
+            print(
+                f"{args.model} ({args.model_args}), gen_kwargs: ({args.gen_kwargs}), limit: {args.limit}, num_fewshot: {args.num_fewshot}, "
+                f"batch_size: {args.batch_size}{f' ({batch_sizes})' if batch_sizes else ''}",
+                file=f
+            )
+            print(make_table(results), file=f)
+            if "groups" in results:
+                print(make_table(results, "groups"), file=f)
 
         if args.wandb_args:
             # Tear down wandb run once all the logging is done.
