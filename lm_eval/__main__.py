@@ -398,7 +398,7 @@ def cli_evaluate(args: Union[argparse.Namespace, None] = None) -> None:
                         ensure_ascii=False,
                     )
                     filename.write_text(samples_dumped, encoding="utf-8")
-        with open('./results/log', 'w') as f:
+        with open(f'{args.model}_log', 'w') as f:
             print(
                 f"{args.model} ({args.model_args}), gen_kwargs: ({args.gen_kwargs}), limit: {args.limit}, num_fewshot: {args.num_fewshot}, "
                 f"batch_size: {args.batch_size}{f' ({batch_sizes})' if batch_sizes else ''}",
