@@ -954,8 +954,16 @@ class HFLM(TemplateLM):
         )
 
         usage_frequency_state_dict = {}
-        for layer in range(32):
-            usage_frequency_state_dict[f"model.layers.{layer}.block_sparse_moe"] = torch.zeros(8, device="cpu")
+        print(self._config.architectures)
+        if self._config.architecutres[0] == "MixtralForCausalLM":
+            num_experts = self._config.num_local_experts
+        elif self.config.architecutres[0] == "Qwen2MoeForCausalLM":
+            num_experts = self._config.num_experts
+        else:
+            num_experts = 4
+        
+        for layer in range(self._config.num_hidden_layers):
+            usage_frequency_state_dict[f"model.layers.{layer}.block_sparse_moe"] = torch.zeros(self._config.num_local_experts, device="cpu")
         for chunk in chunks:
             inps = []
             cont_toks_list = []
@@ -1054,8 +1062,8 @@ class HFLM(TemplateLM):
             # NOTE: Compute usage frequencyu
             logits, all_router_logits = self._model_call(batched_inps, **call_kwargs)
             all_router_logits = torch.stack(all_router_logits)
-            selected_experts = torch.topk(all_router_logits, 2, dim=-1)[1].reshape(32, -1)
-            for layer_idx in range(32):
+            selected_experts = torch.topk(all_router_logits, 2, dim=-1)[1].reshape(22, -1)
+            for layer_idx in range(self._config.num_hidden_layers):
                 ffn_name = f"model.layers.{layer_idx}.block_sparse_moe"
                 unique, counts = torch.unique(selected_experts[layer_idx], return_counts=True)
                 usage_frequency_state_dict[ffn_name][unique.cpu()] += counts.cpu()
