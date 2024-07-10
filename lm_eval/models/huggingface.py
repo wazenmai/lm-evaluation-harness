@@ -955,15 +955,15 @@ class HFLM(TemplateLM):
 
         usage_frequency_state_dict = {}
         print(self._config.architectures)
-        if self._config.architecutres[0] == "MixtralForCausalLM":
+        if self._config.architectures[0] == "MixtralForCausalLM":
             num_experts = self._config.num_local_experts
-        elif self.config.architecutres[0] == "Qwen2MoeForCausalLM":
+        elif self.config.architectures[0] == "Qwen2MoeForCausalLM":
             num_experts = self._config.num_experts
         else:
             num_experts = 4
         
         for layer in range(self._config.num_hidden_layers):
-            usage_frequency_state_dict[f"model.layers.{layer}.block_sparse_moe"] = torch.zeros(self._config.num_local_experts, device="cpu")
+            usage_frequency_state_dict[f"model.layers.{layer}.block_sparse_moe"] = torch.zeros(num_experts, device="cpu")
         for chunk in chunks:
             inps = []
             cont_toks_list = []
