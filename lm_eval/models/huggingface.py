@@ -1062,7 +1062,7 @@ class HFLM(TemplateLM):
             # NOTE: Compute usage frequencyu
             logits, all_router_logits = self._model_call(batched_inps, **call_kwargs)
             all_router_logits = torch.stack(all_router_logits)
-            selected_experts = torch.topk(all_router_logits, 2, dim=-1)[1].reshape(self._config.num_hidden_layers, -1)
+            selected_experts = torch.topk(all_router_logits, self._config.num_experts_per_tok, dim=-1)[1].reshape(self._config.num_hidden_layers, -1)
             for layer_idx in range(self._config.num_hidden_layers):
                 ffn_name = f"model.layers.{layer_idx}.block_sparse_moe"
                 unique, counts = torch.unique(selected_experts[layer_idx], return_counts=True)
