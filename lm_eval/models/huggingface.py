@@ -761,9 +761,9 @@ class HFLM(TemplateLM):
                 ).logits
             else:
                 assert self.AUTO_MODEL_CLASS == transformers.AutoModelForCausalLM
-                outputs = self.model(inps, output_router_logits=True)
-                return outputs.logits, outputs.router_logits
-                # return self.model(inps).logits
+                # outputs = self.model(inps, output_router_logits=True)
+                # return outputs.logits, outputs.router_logits
+                return self.model(inps).logits
 
     def _model_generate(self, context, max_length, stop, **generation_kwargs):
         # temperature = 0.0 if not set
@@ -1060,19 +1060,19 @@ class HFLM(TemplateLM):
                 }
             
             # NOTE: Compute usage frequencyu
-            logits, all_router_logits = self._model_call(batched_inps, **call_kwargs)
-            all_router_logits = torch.stack(all_router_logits)
-            selected_experts = torch.topk(all_router_logits, self._config.num_experts_per_tok, dim=-1)[1].reshape(self._config.num_hidden_layers, -1)
-            for layer_idx in range(self._config.num_hidden_layers):
-                ffn_name = f"model.layers.{layer_idx}.block_sparse_moe"
-                unique, counts = torch.unique(selected_experts[layer_idx], return_counts=True)
-                usage_frequency_state_dict[ffn_name][unique.cpu()] += counts.cpu()
-            multi_logits = F.log_softmax(logits, dim=-1)
+            # logits, all_router_logits = self._model_call(batched_inps, **call_kwargs)
+            # all_router_logits = torch.stack(all_router_logits)
+            # selected_experts = torch.topk(all_router_logits, self._config.num_experts_per_tok, dim=-1)[1].reshape(self._config.num_hidden_layers, -1)
+            # for layer_idx in range(self._config.num_hidden_layers):
+            #     ffn_name = f"model.layers.{layer_idx}.block_sparse_moe"
+            #     unique, counts = torch.unique(selected_experts[layer_idx], return_counts=True)
+            #     usage_frequency_state_dict[ffn_name][unique.cpu()] += counts.cpu()
+            # multi_logits = F.log_softmax(logits, dim=-1)
             
             # NOTE: original code
-            # multi_logits = F.log_softmax(
-            #     self._model_call(batched_inps, **call_kwargs), dim=-1
-            # )  # [batch, padding_length (inp or cont), vocab]
+            multi_logits = F.log_softmax(
+                self._model_call(batched_inps, **call_kwargs), dim=-1
+            )  # [batch, padding_length (inp or cont), vocab]
 
             for (request_str, ctx_tokens, _), logits, inplen, cont_toks in zip(
                 chunk, multi_logits, inplens, cont_toks_list
@@ -1124,11 +1124,11 @@ class HFLM(TemplateLM):
                     self.cache_hook.add_partial("loglikelihood", request_str, answer)
                     pbar.update(1)
         pbar.close()
-        usage_frequency_state_dict = {k: v / torch.sum(v) for k, v in usage_frequency_state_dict.items()}
-        for k in usage_frequency_state_dict.keys():
-            for num in usage_frequency_state_dict[k]:
-                print(round(num.item(), 4), end=",")
-            print()
+        # usage_frequency_state_dict = {k: v / torch.sum(v) for k, v in usage_frequency_state_dict.items()}
+        # for k in usage_frequency_state_dict.keys():
+        #     for num in usage_frequency_state_dict[k]:
+        #         print(round(num.item(), 4), end=",")
+        #     print()
 
         return re_ord.get_original(res)
 
