@@ -106,6 +106,7 @@ def simple_evaluate(
     :return
         Dictionary of results
     """
+    print(f"seed: {random_seed}, numpy_seed: {numpy_random_seed}, torch_seed: {torch_random_seed}")
     eval_logger.setLevel(getattr(logging, f"{verbosity}"))
     start_date = time.time()
 
